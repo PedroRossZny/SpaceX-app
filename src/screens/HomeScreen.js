@@ -9,6 +9,7 @@ export default function HomeScreen({ navigation }) {
   const [launches, setLaunches] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -17,6 +18,7 @@ export default function HomeScreen({ navigation }) {
         setLaunches(data);
       } catch (e) {
         console.error(e);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -50,19 +52,26 @@ export default function HomeScreen({ navigation }) {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <Card onPress={() => navigation.navigate('Detalhes', { launch: item })}>
-              {item.links?.patch?.small ? (
+              {item.image ? (
                 <Image
-                  source={{ uri: item.links.patch.small }}
-                  style={{ width: 50, height: 50, marginBottom: 10 }}
-                  resizeMode="contain"
+                  source={{ uri: item.image }}
+                  style={{ width: '100%', height: 140, borderRadius: 8, marginBottom: 10 }}
+                  resizeMode="cover"
                 />
               ) : null}
               <CardTitle>{item.name}</CardTitle>
               <Text style={{ color: '#ccc' }}>
-                {item.date_utc ? new Date(item.date_utc).toLocaleString() : 'Data indisponível'}
+                {item.date ? new Date(item.date).toLocaleString() : 'Data indisponível'}
               </Text>
             </Card>
           )}
+          ListEmptyComponent={
+            <Text style={{ color: '#777', marginTop: 10 }}>
+              {error
+                ? 'Não foi possível carregar os lançamentos agora. Tente de novo em alguns minutos.'
+                : 'Nenhuma missão encontrada.'}
+            </Text>
+          }
         />
       )}
     </Container>

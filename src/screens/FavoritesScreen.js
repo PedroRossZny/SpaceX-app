@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { FlatList, Text } from 'react-native';
 import { Card, CardTitle, Container } from '../components/ui';
+import { fromStorage } from '../services/spacex';
 
 export default function FavoritesScreen({ navigation }) {
   const [favorites, setFavorites] = useState([]);
@@ -15,7 +16,7 @@ export default function FavoritesScreen({ navigation }) {
     const user = await AsyncStorage.getItem('userAtivo');
     const stored = await AsyncStorage.getItem(`favoritos_${user}`);
     const parsed = stored ? JSON.parse(stored) : [];
-    setFavorites(parsed);
+    setFavorites(parsed.map(fromStorage));
   };
 
   return (
@@ -29,7 +30,7 @@ export default function FavoritesScreen({ navigation }) {
           <Card onPress={() => navigation.navigate('Detalhes', { launch: item })}>
             <CardTitle>{item.name}</CardTitle>
             <Text style={{ color: '#ccc' }}>
-              {item.date_utc ? new Date(item.date_utc).toLocaleString() : '—'}
+              {item.date ? new Date(item.date).toLocaleString() : 'Data indisponível'}
             </Text>
           </Card>
         )}

@@ -1,41 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Button, Image, ScrollView, Text, View } from 'react-native';
+import { Button, Image, ScrollView, Text, View } from 'react-native';
 import { Container } from '../components/ui';
-import { getLaunchpad, getRocket } from '../services/spacex';
 
 export default function DetailsScreen({ route }) {
   const { launch } = route.params;
   const [isFavorite, setIsFavorite] = useState(false);
-  const [rocket, setRocket] = useState(null);
-  const [launchpad, setLaunchpad] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkIfFavorite();
     (async () => {
-      try {
-        const [r, p] = await Promise.all([
-          getRocket(launch.rocket),
-          getLaunchpad(launch.launchpad),
-        ]);
-        setRocket(r);
-        setLaunchpad(p);
-      } catch (e) {
-        console.error('Erro ao carregar detalhes:', e);
-        Alert.alert('Erro', 'Não foi possível carregar detalhes agora.');
-      } finally {
-        setLoading(false);
-      }
+      const user = await AsyncStorage.getItem('userAtivo');
+      const stored = await AsyncStorage.getItem(`favoritos_${user}`);
+      const parsed = stored ? JSON.parse(stored) : [];
+      setIsFavorite(parsed.some((item) => item.id === launch.id));
     })();
-  }, []);
-
-  const checkIfFavorite = async () => {
-    const user = await AsyncStorage.getItem('userAtivo');
-    const stored = await AsyncStorage.getItem(`favoritos_${user}`);
-    const parsed = stored ? JSON.parse(stored) : [];
-    setIsFavorite(parsed.some((item) => item.id === launch.id));
-  };
+  }, [launch]);
 
   const toggleFavorite = async () => {
     const user = await AsyncStorage.getItem('userAtivo');
@@ -55,30 +34,23 @@ export default function DetailsScreen({ route }) {
   return (
     <ScrollView style={{ backgroundColor: '#000' }}>
       <Container>
-        {launch.links?.patch?.small ? (
+        {launch.image ? (
           <Image
-            source={{ uri: launch.links.patch.small }}
-            style={{ width: 150, height: 150, alignSelf: 'center', marginBottom: 20 }}
-            resizeMode="contain"
+            source={{ uri: launch.image }}
+            style={{ width: '100%', height: 220, borderRadius: 10, marginBottom: 20 }}
+            resizeMode="cover"
           />
         ) : null}
 
         <Text style={{ color: '#fff', fontSize: 24 }}>{launch.name}</Text>
         <Text style={{ color: '#ccc' }}>
-          Data: {launch.date_utc ? new Date(launch.date_utc).toLocaleString() : '—'}
+          Data: {launch.date ? new Date(launch.date).toLocaleString() : 'indisponível'}
         </Text>
-
-        {loading ? (
-          <ActivityIndicator size="large" color="#fff" style={{ marginTop: 20 }} />
-        ) : (
-          <>
-            {rocket && <Text style={{ color: '#ccc' }}>Foguete: {rocket.name}</Text>}
-            {launchpad && <Text style={{ color: '#ccc' }}>Local: {launchpad.name}</Text>}
-          </>
-        )}
+        {launch.rocket ? <Text style={{ color: '#ccc' }}>Foguete: {launch.rocket}</Text> : null}
+        {launch.launchpad ? <Text style={{ color: '#ccc' }}>Local: {launch.launchpad}</Text> : null}
 
         <Text style={{ color: '#ccc', marginTop: 10 }}>
-          {launch.details || 'Sem detalhes fornecidos pela SpaceX.'}
+          {launch.details || 'Sem descrição da missão.'}
         </Text>
 
         <View style={{ marginTop: 20 }}>
