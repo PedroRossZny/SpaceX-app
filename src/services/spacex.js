@@ -7,7 +7,7 @@ const api = axios.create({
 
 export async function getLaunches() {
   const res = await api.get('/launches');
-  // reverse para vir do mais recente ao mais antigo (igual no seu código)
+  // The API returns launches oldest first; reverse to show the newest at the top.
   return res.data.reverse();
 }
 

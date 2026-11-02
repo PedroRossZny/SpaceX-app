@@ -12,7 +12,12 @@ export default function DetailsScreen({ route }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkIfFavorite();
+    (async () => {
+      const user = await AsyncStorage.getItem('userAtivo');
+      const stored = await AsyncStorage.getItem(`favoritos_${user}`);
+      const parsed = stored ? JSON.parse(stored) : [];
+      setIsFavorite(parsed.some((item) => item.id === launch.id));
+    })();
     (async () => {
       try {
         const [r, p] = await Promise.all([
@@ -28,14 +33,7 @@ export default function DetailsScreen({ route }) {
         setLoading(false);
       }
     })();
-  }, []);
-
-  const checkIfFavorite = async () => {
-    const user = await AsyncStorage.getItem('userAtivo');
-    const stored = await AsyncStorage.getItem(`favoritos_${user}`);
-    const parsed = stored ? JSON.parse(stored) : [];
-    setIsFavorite(parsed.some((item) => item.id === launch.id));
-  };
+  }, [launch]);
 
   const toggleFavorite = async () => {
     const user = await AsyncStorage.getItem('userAtivo');
