@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "SpaceX-app",
-    "slug": "SpaceX-app",
+    "name": "SpaceX Launches",
+    "slug": "spacex-launches",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "spacexapp",
+    "scheme": "spacexlaunches",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
